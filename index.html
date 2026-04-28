@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GeoViz Earth — Real-time planetary hazard monitor. Live earthquakes, volcanoes, and ocean currents on an interactive 3D globe.">
+  <title>GeoViz Earth — Planetary Hazard Monitor</title>
+
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- LEAFLET -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- CHART.JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- LUCIDE ICONS -->
+  <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/map-ui.css">
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen" role="status" aria-live="polite">
+  <div class="loading-logo">GeoViz <span>Earth</span></div>
+  <div class="loading-bar-track">
+    <div class="loading-bar-fill" id="loading-bar-fill"></div>
+  </div>
+  <div class="loading-status" id="loading-status">Initializing…</div>
+</div>
+
+<!-- MAP -->
+<div id="map" role="application" aria-label="Interactive earthquake and hazard map"></div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particle-canvas" aria-hidden="true" style="display:none"></canvas>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
+
+<!-- MAP LOADING INDICATOR -->
+<div class="map-loading-indicator hidden" id="map-loading-indicator">
+  <div class="spinner"></div>
+  <span class="loading-label">Loading…</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════════════════════ -->
+<nav id="navbar" role="navigation" aria-label="Main navigation">
+  <!-- Logo -->
+  <div class="nav-logo">
+    <div class="live-dot" aria-hidden="true"></div>
+    <span class="nav-logo-text">GeoViz Earth</span>
+  </div>
+
+  <!-- Nav Tabs -->
+  <div class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="seismic" role="tab" aria-selected="true"
+            aria-controls="sidebar" aria-label="Seismic activity tab">
+      Seismic
+    </button>
+    <button class="nav-tab" data-tab="volcanic" role="tab" aria-selected="false"
+            aria-label="Volcanic activity tab">
+      Volcanic
+    </button>
+    <button class="nav-tab" data-tab="ocean" role="tab" aria-selected="false"
+            aria-label="Ocean currents tab">
+      Ocean
+    </button>
+  </div>
+
+  <!-- Right side -->
+  <div class="nav-right">
+    <div class="live-badge">
+      <div class="dot" aria-hidden="true"></div>
+      LIVE
+    </div>
+    <span id="last-updated" aria-live="polite">—</span>
+    <button class="icon-btn" id="settings-btn" aria-label="Settings" aria-haspopup="true">
+      <i data-lucide="settings" style="width:16px;height:16px"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SETTINGS PANEL
+════════════════════════════════════════════════════════════════ -->
+<div id="settings-panel" role="dialog" aria-label="Settings" aria-modal="false">
+  <div class="settings-title">Settings</div>
+
+  <div class="settings-row">
+    <div class="settings-label">
+      Low Power Mode
+      <small>Reduces particles to 500</small>
+    </div>
+    <button class="layer-toggle" id="low-power-toggle" aria-label="Toggle low power mode" role="switch" aria-checked="false"></button>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-label">
+      Auto-rotate Globe
+      <small>Slow eastward spin</small>
+    </div>
+    <button class="layer-toggle" id="globe-spin-toggle" aria-label="Toggle globe spin" role="switch" aria-checked="false"></button>
+  </div>
+
+  <div class="settings-row" style="padding-top:12px;border-top:1px solid var(--border);margin-top:4px">
+    <div class="settings-label" style="font-size:11px;color:var(--text-tertiary)">
+      Data: USGS, NOAA, Smithsonian GVP
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     APP LAYOUT (sidebar + detail panel)
+════════════════════════════════════════════════════════════════ -->
+<div id="app-layout">
+
+  <!-- ─── LEFT SIDEBAR ──────────────────────────────────────────── -->
+  <aside id="sidebar" role="complementary" aria-label="Map controls and statistics">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Layers & Filters</span>
+      <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
+        <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar collapse tab (always visible) -->
+    <div id="sidebar-tab" role="button" tabindex="0" aria-label="Toggle sidebar">
+      <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
+    </div>
+
+    <div class="sidebar-body">
+
+      <!-- SECTION 1: LAYER TOGGLES -->
+      <section class="sb-section" aria-label="Layer visibility">
+        <div class="sb-section-title">Layers</div>
+
+        <div class="layer-row" role="group" aria-label="Earthquakes layer">
+          <button class="layer-toggle on" data-layer="earthquakes" role="switch" aria-checked="true" aria-label="Toggle earthquakes layer"></button>
+          <div class="layer-icon" aria-hidden="true"><i data-lucide="activity" style="width:16px;height:16px"></i></div>
+          <span class="layer-name">Earthquakes</span>
+          <div class="layer-meta">
+            <div class="layer-color-dot" style="background:#E24B4A"></div>
+            <span class="layer-count" id="count-earthquakes">—</span>
+          </div>
+        </div>
+
+        <div class="layer-row" role="group" aria-label="Volcanoes layer">
+          <button class="layer-toggle on" data-layer="volcanoes" role="switch" aria-checked="true" aria-label="Toggle volcanoes layer"></button>
+          <div class="layer-icon" aria-hidden="true"><i data-lucide="mountain" style="width:16px;height:16px"></i></div>
+          <span class="layer-name">Volcanoes</span>
+          <div class="layer-meta">
+            <div class="layer-color-dot" style="background:#EF9F27"></div>
+            <span class="layer-count" id="count-volcanoes">—</span>
+          </div>
+        </div>
+
+        <div class="layer-row" role="group" aria-label="Ocean currents layer">
+          <button class="layer-toggle on" data-layer="currents" role="switch" aria-checked="true" aria-label="Toggle ocean currents layer"></button>
+          <div class="layer-icon" aria-hidden="true"><i data-lucide="waves" style="width:16px;height:16px"></i></div>
+          <span class="layer-name">Ocean Currents</span>
+          <div class="layer-meta">
+            <div class="layer-color-dot" style="background:#00e5ff"></div>
+          </div>
+        </div>
+
+        <div class="layer-row" role="group" aria-label="Tectonic plates layer">
+          <button class="layer-toggle on" data-layer="tectonic" role="switch" aria-checked="true" aria-label="Toggle tectonic plates layer"></button>
+          <div class="layer-icon" aria-hidden="true"><i data-lucide="map" style="width:16px;height:16px"></i></div>
+          <span class="layer-name">Tectonic Plates</span>
+          <div class="layer-meta">
+            <div class="layer-color-dot" style="background:#EF9F27;opacity:0.6"></div>
+          </div>
+        </div>
+
+        <div class="layer-row" role="group" aria-label="Tsunami risk zones layer">
+          <button class="layer-toggle on" data-layer="tsunami" role="switch" aria-checked="true" aria-label="Toggle tsunami risk zones layer"></button>
+          <div class="layer-icon" aria-hidden="true"><i data-lucide="alert-triangle" style="width:16px;height:16px"></i></div>
+          <span class="layer-name">Tsunami Zones</span>
+          <div class="layer-meta">
+            <div class="layer-color-dot" style="background:#E24B4A;opacity:0.6"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: FILTERS (Seismic) -->
+      <section class="sb-section" id="filter-section" aria-label="Earthquake filters">
+        <div class="sb-section-title">Filters</div>
+
+        <div class="filter-row">
+          <div class="filter-label">
+            Minimum Magnitude
+            <span class="filter-label-value" id="mag-value">M0.0+</span>
+          </div>
+          <input type="range" class="range-slider" id="mag-slider"
+                 min="0" max="9" step="0.5" value="0"
+                 aria-label="Minimum magnitude filter">
+          <div class="mag-track-labels">
+            <span>M0</span><span>M3</span><span>M6</span><span>M9</span>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">Depth</div>
+          <div class="pill-group" role="group" aria-label="Depth filter">
+            <button class="pill active" data-depth="all">All</button>
+            <button class="pill" data-depth="shallow">Shallow &lt;70km</button>
+            <button class="pill" data-depth="intermediate">Intermediate</button>
+            <button class="pill" data-depth="deep">Deep &gt;300km</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">Time Range</div>
+          <div class="pill-group" role="group" aria-label="Time range filter">
+            <button class="pill" data-time-range="1h">1h</button>
+            <button class="pill" data-time-range="6h">6h</button>
+            <button class="pill active" data-time-range="24h">24h</button>
+            <button class="pill" data-time-range="7d">7d</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">Region</div>
+          <select class="filter-select" id="region-select" aria-label="Region filter">
+            <option value="global">Global</option>
+            <option value="pacific-ring">Pacific Ring of Fire</option>
+            <option value="mediterranean">Mediterranean</option>
+            <option value="north-america">North America</option>
+            <option value="south-america">South America</option>
+            <option value="europe">Europe</option>
+            <option value="asia">Asia</option>
+            <option value="southeast-asia">Southeast Asia</option>
+            <option value="middle-east">Middle East</option>
+            <option value="africa">Africa</option>
+            <option value="oceania">Oceania / Pacific</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- SECTION 3: STATS -->
+      <section class="sb-section" aria-label="Statistics">
+        <div class="sb-section-title">Statistics</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Events Today</div>
+            <div class="stat-value cyan" id="stat-events">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Max Magnitude</div>
+            <div class="stat-value amber" id="stat-maxmag">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Volcanoes</div>
+            <div class="stat-value green" id="stat-volcanoes">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Eruption Alerts</div>
+            <div class="stat-value red" id="stat-alerts">—</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px">
+          <div class="filter-label">Seismic Activity (last 24h)</div>
+          <div id="sparkline-container">
+            <canvas id="sparkline-chart" aria-label="Hourly earthquake count chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: RECENT EVENTS -->
+      <section class="sb-section" aria-label="Recent seismic events">
+        <div class="sb-section-title">Recent Events</div>
+        <div class="event-list" id="recent-events-list" role="list">
+          <!-- Populated by JS -->
+          <div style="color:var(--text-tertiary);font-size:12px;text-align:center;padding:16px">
+            Loading events…
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /sidebar-body -->
+  </aside>
+
+  <!-- ─── RIGHT DETAIL PANEL ─────────────────────────────────────── -->
+  <aside id="detail-panel" role="dialog" aria-label="Event details" aria-modal="false">
+    <div class="panel-header">
+      <span class="panel-title" id="panel-title">Details</span>
+      <button class="panel-close" id="panel-close-btn" aria-label="Close detail panel">
+        <i data-lucide="x" style="width:14px;height:14px"></i>
+      </button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <!-- Populated by JS -->
+    </div>
+  </aside>
+
+</div><!-- /app-layout -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TIMELINE BAR
+════════════════════════════════════════════════════════════════ -->
+<div id="timeline-bar" role="region" aria-label="Time scrubber">
+  <button id="timeline-play-btn" aria-label="Play timeline animation">
+    <i data-lucide="play" style="width:14px;height:14px"></i>
+  </button>
+
+  <div class="timeline-track-container" role="group" aria-label="Timeline">
+    <div class="timeline-track">
+      <div class="timeline-fill" id="timeline-fill" style="width:100%"></div>
+      <div class="timeline-events-layer" id="timeline-events-layer" aria-hidden="true"></div>
+      <div class="timeline-scrubber" id="timeline-scrubber-dot" style="left:100%" aria-hidden="true"></div>
+      <input type="range" class="timeline-range-input" id="timeline-range-input"
+             min="0" max="1" step="0.001" value="1"
+             aria-label="Timeline position (7 days)">
+    </div>
+    <div class="timeline-labels">
+      <span class="timeline-label-tick">7d ago</span>
+      <span class="timeline-label-tick">6d</span>
+      <span class="timeline-label-tick">5d</span>
+      <span class="timeline-label-tick">4d</span>
+      <span class="timeline-label-tick">3d</span>
+      <span class="timeline-label-tick">2d</span>
+      <span class="timeline-label-tick">1d</span>
+      <span class="timeline-label-tick">now</span>
+    </div>
+  </div>
+
+  <div class="timeline-time-label" id="timeline-current-time">Live</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════════════════════ -->
+<script src="js/dataManager.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/mapManager.js"></script>
+<script src="js/uiManager.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  // Initialize Lucide icons
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - Japan/Kuril", "risk": "extreme" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[130,25],[155,25],[165,45],[155,50],[140,48],[130,40],[130,25]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - Cascadia", "risk": "high" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-130,40],[-120,40],[-120,52],[-130,52],[-140,50],[-140,42],[-130,40]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - Chile/Peru", "risk": "extreme" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-85,-5],[-65,-5],[-65,-45],[-80,-45],[-85,-20],[-85,-5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - Alaska/Aleutians", "risk": "high" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-180,50],[-140,52],[-130,57],[-145,62],[-165,62],[-180,58],[-180,50]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Indian Ocean - Sumatra/Andaman", "risk": "extreme" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[88,-5],[105,-5],[105,15],[92,15],[85,12],[88,-5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Indian Ocean - Arabian Sea", "risk": "moderate" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[55,10],[75,10],[75,25],[60,25],[55,20],[55,10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mediterranean - Eastern", "risk": "moderate" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20,30],[38,30],[38,42],[28,42],[20,38],[20,30]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Caribbean Arc", "risk": "moderate" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-85,8],[-60,8],[-58,18],[-68,22],[-80,20],[-85,15],[-85,8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - Philippines/Marianas", "risk": "extreme" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[118,5],[145,5],[150,20],[138,22],[120,18],[118,10],[118,5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pacific Ring - New Zealand/Tonga", "risk": "high" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[165,-50],[185,-50],[185,-15],[175,-15],[165,-25],[162,-38],[165,-50]]]
+      }
+    }
+  ]
+}

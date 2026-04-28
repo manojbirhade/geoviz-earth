@@ -1,0 +1,306 @@
+/* LEAFLET OVERRIDES */
+
+/* Push controls above the timeline bar */
+.leaflet-bottom {
+  bottom: calc(var(--timeline-height) + 8px) !important;
+}
+
+/* Zoom control styling */
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--surface) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border) !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 16px !important;
+  transition: var(--transition) !important;
+  transition-property: background, color !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(0,0,0,0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Scale control */
+.leaflet-control-scale-line {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: var(--text-tertiary) !important;
+  color: var(--text-secondary) !important;
+  font-size: 10px !important;
+  padding: 1px 5px !important;
+}
+
+/* Attribution */
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.85) !important;
+  color: var(--text-secondary) !important;
+  font-size: 10px !important;
+  border-radius: 4px 0 0 0 !important;
+  padding: 2px 6px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--accent-cyan) !important;
+}
+
+/* Remove default Leaflet marker styles bleeding in */
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-map-pane svg,
+.leaflet-map-pane canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  /* intentionally blank — keep Leaflet's own stacking */
+}
+
+/* TIMELINE BAR */
+#timeline-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--timeline-height);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+#timeline-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(2,132,199,0.1);
+  border: 1px solid rgba(2,132,199,0.25);
+  color: var(--accent-cyan);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+  transition-property: background;
+}
+
+#timeline-play-btn:hover {
+  background: rgba(2,132,199,0.18);
+}
+
+.timeline-time-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  min-width: 140px;
+}
+
+.timeline-track-container {
+  flex: 1;
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 2px;
+  position: relative;
+  overflow: visible;
+}
+
+.timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan) 0%, rgba(0,229,255,0.4) 100%);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.timeline-events-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.timeline-event-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  opacity: 0.8;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.timeline-scrubber {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(2,132,199,0.2);
+  cursor: grab;
+  z-index: 2;
+  transition: box-shadow 150ms ease;
+}
+
+.timeline-scrubber:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 6px rgba(0,229,255,0.2);
+}
+
+.timeline-range-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  height: 100%;
+  margin: 0;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.timeline-label-tick {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* SETTINGS PANEL */
+#settings-panel {
+  position: fixed;
+  top: 56px;
+  right: 8px;
+  width: 260px;
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  z-index: 150;
+  display: none;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  animation: scaleIn 200ms ease;
+}
+
+#settings-panel.open {
+  display: block;
+}
+
+.settings-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.settings-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.settings-label small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+/* MAP LOADING INDICATOR */
+.map-loading-indicator {
+  position: fixed;
+  top: calc(var(--navbar-height) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  z-index: 50;
+  transition: opacity 300ms ease, visibility 300ms ease;
+}
+
+.map-loading-indicator.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* MAGNITUDE FILTER TRACK */
+.mag-track-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.mag-track-labels span {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* DEPTH INDICATOR GRADIENT */
+.depth-gradient {
+  display: flex;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+  gap: 1px;
+}
+
+.depth-gradient-shallow { flex: 1; background: rgba(0,229,255,0.6); }
+.depth-gradient-mid { flex: 1; background: rgba(239,159,39,0.6); }
+.depth-gradient-deep { flex: 1; background: rgba(226,75,74,0.6); }

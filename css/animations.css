@@ -1,0 +1,219 @@
+/* KEYFRAMES */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes pulseRingMajor {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(calc(100% + 16px)); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(calc(100% + 16px)); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes volcanoPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes tsunamiBorderPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  from { background-position: -200px 0; }
+  to { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes volcanoPulseLight {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px currentColor); }
+  50% { opacity: 0.6; filter: drop-shadow(0 0 1px currentColor); }
+}
+
+/* EARTHQUAKE PULSE RINGS (Mapbox uses these via HTML overlay) */
+.quake-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid;
+  pointer-events: none;
+  animation: pulseRing 2s ease-out infinite;
+}
+
+.quake-ring.major {
+  animation: pulseRingMajor 1.5s ease-out infinite;
+  border-width: 3px;
+}
+
+/* VOLCANO MARKER */
+.volcano-marker {
+  width: 0;
+  height: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.volcano-marker .triangle {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 12px solid;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.volcano-marker.active .triangle {
+  border-bottom-color: #E24B4A;
+  animation: volcanoPulse 1.5s ease-in-out infinite;
+}
+
+.volcano-marker.dormant .triangle {
+  border-left-width: 5px;
+  border-right-width: 5px;
+  border-bottom-width: 9px;
+  border-bottom-color: #8a9ab0;
+}
+
+.volcano-marker.watch .triangle {
+  border-bottom-color: #EF9F27;
+  animation: volcanoPulse 2s ease-in-out infinite;
+}
+
+/* TOAST */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-md);
+  width: 300px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  animation: toastSlideIn 200ms ease-out;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.toast.dismiss {
+  animation: toastSlideOut 200ms ease-in forwards;
+}
+
+.toast-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.toast-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.toast-dismiss {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.toast-dismiss:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+}
+
+/* SKELETON LOADER */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.08) 40px, rgba(255,255,255,0.04) 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.2s infinite linear;
+  border-radius: 4px;
+}
+
+/* LOADING BAR ANIMATION */
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.loading-dots::after {
+  content: '';
+  animation: loadingDotsAnim 1.5s infinite;
+}
+
+@keyframes loadingDotsAnim {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
+
+/* TRANSITION CLASSES */
+.fade-in { animation: fadeIn 300ms ease; }
+.scale-in { animation: scaleIn 300ms ease; }
+
+/* GLOW EFFECTS */
+.glow-cyan { text-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
+.glow-red { text-shadow: 0 0 12px rgba(226, 75, 74, 0.5); }
+.glow-amber { text-shadow: 0 0 12px rgba(239, 159, 39, 0.5); }
